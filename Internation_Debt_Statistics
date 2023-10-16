@@ -1,0 +1,82 @@
+--Dataset: International Debt Statistics
+--Source: The World Bank
+--Queried with BigQuery
+
+--Select all columns limit of ten to see data and fields we are working with
+
+SELECT *
+FROM international_debt
+LIMIT 10;
+
+--Extracting unique countries
+
+SELECT 
+   COUNT(DISTINCT country_name) AS total_distinct_countries
+FROM international_debt;
+
+--Selecting unique debt_indicators to see what categories of debt there are
+
+ SELECT
+  DISTINCT indicator_code AS distinct_debt_indicators
+FROM
+  international_debt
+ORDER BY distinct_debt_indicators;
+
+--Finding out total debt in USD that is owed by different countries
+
+SELECT 
+    ROUND(SUM(debt)/1000000, 2) AS total_debt
+FROM international_debt; 
+
+--Finding what country has the most overall debt (China no surprise there)
+
+SELECT 
+    country_name, 
+    SUM(debt) AS total_debt
+FROM international_debt
+GROUP BY country_name
+ORDER BY total_debt DESC
+LIMIT 1;
+
+--We can dig even further to find out on an average how much debt a country owes? This will give us a better sense of the distribution of the amount of debt across different indicators.
+
+SELECT 
+    indicator_code AS debt_indicator,
+    indicator_name,
+    AVG(debt) AS average_debt
+FROM international_debt
+GROUP BY debt_indicator, indicator_name
+ORDER BY average_debt DESC
+LIMIT 10;
+
+--We can investigate this a bit more so as to find out which country owes the highest amount of debt in the category of long term debts 
+
+SELECT 
+    country_name, 
+    indicator_name
+FROM international_debt
+WHERE debt = (SELECT 
+                  MAX(debt)
+              FROM international_debt
+              WHERE indicator_code='DT.AMT.DLXF.CD');
+
+--Finding the most common debt indicator in which countries owe their debt
+
+SELECT
+  indicator_code,
+  COUNT(indicator_code) AS indicator_count
+FROM international_debt
+GROUP BY indicator_code
+ORDER BY indicator_count DESC, indicator_code DESC
+LIMIT 20;
+
+--Finding out the maximum amount of debt each country has (top ten most in debt countries)
+
+SELECT
+  indicator_code,
+  COUNT(indicator_code) AS indicator_count
+FROM international_debt
+GROUP BY indicator_code
+ORDER BY indicator_count DESC, indicator_code DESC
+LIMIT 20;
+
